@@ -1,25 +1,140 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import { useEffect, useRef } from "react";
+import useWebAnimations from "@wellyshen/use-web-animations";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+  const Background1 = useRef(null);
+  const Background2 = useRef(null);
+  const Foreground1 = useRef(null);
+  const Foreground2 = useRef(null);
 
+  const Queen = useWebAnimations({
+    keyframes:[
+      { transform: 'translateY(0)' },
+      { transform: 'translateY(-100%)' } 
+  ],
+    timing: {
+      easing: 'steps(7, end)',
+      direction: "reverse",
+      duration: 600,
+      playbackRate: 1,
+      iterations: Infinity
+  },
+  })
+  
+  useEffect(() => {
+
+  var sceneryFrames =   [
+    { transform: 'translateX(100%)' },
+    { transform: 'translateX(-100%)' }   
+  ];
+
+  var sceneryTimingBackground = {
+    duration: 36000,
+    iterations: Infinity,
+    playbackRate: 0,
+  };
+
+  const sceneryTimingForeground = {
+    duration: 12000,
+    iterations: Infinity,
+    playbackRate: 0,
+  };
+
+  var Foreground1Movement = Foreground1.current.animate(
+    sceneryFrames,
+    sceneryTimingForeground,
+  );
+  Foreground1Movement.currentTime = 12000 / 2;
+  
+  var Foreground2Movement = Foreground2.current.animate(
+    sceneryFrames,
+    sceneryTimingForeground,
+  );
+
+  var Background1Movement = Background1.current.animate(
+    sceneryFrames,
+    sceneryTimingBackground,
+  );
+  Background1Movement.currentTime = 36000 / 2;
+
+  var Background2Movement = Background2.current.animate(
+    sceneryFrames,
+    sceneryTimingBackground,
+  );
+
+  var sceneries = [Foreground1Movement, Foreground2Movement, Background1Movement, Background2Movement];
+
+  var adjustBackgroundPlayback = function() {
+    if (Queen.getAnimation().playbackRate > 1.2) {
+      sceneries.forEach(function(anim) {
+        anim.playbackRate = Queen.getAnimation().playbackRate/2;
+      });
+    }
+    else if (Queen.getAnimation().playbackRate < .9) {
+      sceneries.forEach(function(anim) {
+        anim.playbackRate = Queen.getAnimation().playbackRate= .9;
+      });
+    }
+       else {
+      sceneries.forEach(function(anim) {
+        anim.playbackRate = 1;    
+      });
+    }   
+  }
+  adjustBackgroundPlayback();
+  setInterval( function() {
+    /* Set decay */
+    if (Queen.getAnimation().playbackRate > .4) {
+      Queen.getAnimation().playbackRate *= .9;    
+    } 
+    adjustBackgroundPlayback();
+  }, 3000);
+  
+  var goFaster = function() {
+    /* But you can speed them up by giving the screen a click or a tap. */
+    Queen.getAnimation().playbackRate *= 1.1;
+    adjustBackgroundPlayback();
+  }
+  
+  document.addEventListener("click", goFaster);
+  document.addEventListener("touchstart", goFaster);  
+
+},[Queen]);
+
+
+  return (
+    <div className="wrapper">
+  <div className="sky"></div>
+  <div className="earth">
+    <div id="red-queen_and_alice" >
+      <img id="red-queen_and_alice_sprite" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/sprite_running-alice-queen_small.png" srcSet="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/sprite_running-alice-queen.png 2x" alt="Alice and the Red Queen running to stay in place." ref={Queen.ref}/>
+    </div>
+  </div>
+  <div className="scenery" id="foreground1" ref={Foreground1}>
+    <img id="w_knight" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/r_knight_small.png" srcSet="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/r_knight.png 2x" alt=" "/>
+    <img id="palm3" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/palm3_small.png" srcSet="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/palm3.png 2x" alt=" "/>
+    <img id="palm4" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/palm3_small.png" srcSet="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/palm3.png 2x" alt=" "/>
+    <img id="w_pawn_upright" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/r_pawn_upright_small.png" srcSet="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/r_pawn_upright.png 2x" alt=" "/>
+  </div>
+  <div className="scenery" id="foreground2" ref={Foreground2}>    
+    <img id="bush" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/bush_small.png" srcSet="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/bush.png 2x" alt=" "/>
+    <img id="e_rook_upright" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/w_rook_upright_small.png" srcSet="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/w_rook_upright.png 2x" alt=" "/>
+    <img id="w_rook_upright" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/w_rook_upright_small.png" srcSet="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/w_rook_upright.png 2x" alt=" "/>
+  </div>
+  <div className="scenery" id="background1" ref={Background1}>
+    <img id="palm5" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/palm1_small.png" srcSet="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/palm1.png 2x" alt=" "/>
+    <img id="r_pawn_upright" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/r_pawn_upright_small.png" srcSet="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/r_pawn_upright.png 2x" alt=" "/>
+    <img id="w_rook" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/w_rook_small.png" srcSet="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/w_rook.png 2x" alt=" "/>
+    <img id="palm1" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/palm1_small.png" srcSet="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/palm1.png 2x" alt=" "/>
+  </div>
+  <div className="scenery" id="background2" ref={Background2}>
+    <img id="r_pawn" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/r_pawn_small.png" srcSet="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/r_pawn.png 2x" alt=" "/>
+    <img id="r_knight" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/r_knight_small.png" srcSet="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/r_knight.png 2x" alt=" "/>
+    <img id="palm2" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/palm2_small.png" srcSet="https://s3-us-west-2.amazonaws.com/s.cdpn.io/641/palm2.png 2x" alt=" "/>
+  </div>
+</div>
+    );
+    }
+  
 export default App;
